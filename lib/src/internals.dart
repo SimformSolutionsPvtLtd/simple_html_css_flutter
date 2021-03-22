@@ -147,9 +147,17 @@ class Parser {
   /// Converts HTML content to a list of [TextSpan] objects
   List<TextSpan> parse() {
     List<TextSpan> spans = <TextSpan>[];
+    bool isOrderedList = false;
+    int orderedListItemCounter = 1;
     for (final XmlEvent event in _events) {
       if (event is XmlStartElementEvent) {
         if (!event.isSelfClosing) {
+          if (event.name == 'ol') {
+            isOrderedList = true;
+            orderedListItemCounter = 1;
+          } else if (event.name == 'ul') {
+            isOrderedList = false;
+          }
           String styles = '';
           final String tagName = event.name.toLowerCase();
           TextStyle? overrideStyles;
@@ -253,8 +261,8 @@ class Parser {
               break;
 
             case 'a':
-              styles =
-                  'visit_link:__#TO_GET#__; text-decoration: underline; color: #4287f5;';
+              styles = 'visit_link:__#TO_GET#__; text-decoration: '
+                  'underline; color: #4287f5;';
               break;
 
 // dropping partial support for ul-li bullets
@@ -291,6 +299,15 @@ class Parser {
                   attribute.value.replaceAll(':', '__#COLON#__'));
             }
           }
+
+          if (event.name == 'li') {
+            if (isOrderedList) {
+              spans.add(TextSpan(text: '\n    ${orderedListItemCounter++}.  '));
+            } else {
+              spans.add(const TextSpan(text: '\n    •  '));
+            }
+          }
+
           _stack.add(_Tag(event.name, styles, overrideStyles));
         } else {
           if (event.name == 'br') {
@@ -314,6 +331,9 @@ class Parser {
         } else if (event.name == 'li') {
           spans.add(const TextSpan(text: '\n'));
         } else if (event.name == 'ul' || event.name == 'ol') {
+          spans.add(const TextSpan(text: '\n'));
+        } else if (event.name == 'ol' || event.name == 'ul') {
+          isOrderedList = false;
           spans.add(const TextSpan(text: '\n'));
         }
 
