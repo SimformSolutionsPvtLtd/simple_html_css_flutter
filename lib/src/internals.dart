@@ -302,9 +302,23 @@ class Parser {
 
           if (event.name == 'li') {
             if (isOrderedList) {
-              spans.add(TextSpan(text: '\n    ${orderedListItemCounter++}.  '));
+              spans.add(
+                TextSpan(
+                  text: '    ${orderedListItemCounter++}.  ',
+                  style: const TextStyle(
+                    height: 1.5,
+                  ),
+                ),
+              );
             } else {
-              spans.add(const TextSpan(text: '\n    •  '));
+              spans.add(
+                const TextSpan(
+                  text: '    •  ',
+                  style: TextStyle(
+                    height: 1.5,
+                  ),
+                ),
+              );
             }
           }
 
@@ -319,18 +333,28 @@ class Parser {
       // TODO: see if there is a better way to add space after these tags
       // maybe use widget spans
       if (event is XmlEndElementEvent) {
-        if (event.name == 'p' ||
-            event.name == 'h1' ||
+        if (event.name == 'p' || event.name == 'div') {
+          spans.add(
+            const TextSpan(
+              text: ' \n',
+              style: TextStyle(
+                height: 1.4,
+              ),
+            ),
+          );
+        } else if (event.name == 'h1' ||
             event.name == 'h2' ||
             event.name == 'h3' ||
             event.name == 'h4' ||
             event.name == 'h5' ||
-            event.name == 'h6' ||
-            event.name == 'div') {
-          spans.add(const TextSpan(text: '\n\n'));
+            event.name == 'h6') {
+          spans.add(const TextSpan(
+            text: ' \n',
+            style: TextStyle(
+              height: 2.0,
+            ),
+          ));
         } else if (event.name == 'li') {
-          spans.add(const TextSpan(text: '\n'));
-        } else if (event.name == 'ul' || event.name == 'ol') {
           spans.add(const TextSpan(text: '\n'));
         } else if (event.name == 'ol' || event.name == 'ul') {
           isOrderedList = false;
